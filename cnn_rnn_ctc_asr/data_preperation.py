@@ -46,8 +46,8 @@ def prepare_audiomnist(
     # recordings.to_file(output_dir / "audio_mnist_recordings.jsonl.gz")
     # exists just load them from disk
 
-    supervision_file = Path(output_dir / "audio_mnist_supervisions.jsonl.gz")
-    recordings_file = Path(output_dir / "audio_mnist_recordings.jsonl.gz")
+    supervision_file = Path(output_dir) / "audio_mnist_supervisions.jsonl.gz"
+    recordings_file = Path(output_dir) / "audio_mnist_recordings.jsonl.gz"
 
     if recordings_file.is_file() and supervision_file.is_file():
         logger.info("Loading existing AudioMNIST dataset...")

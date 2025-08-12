@@ -13,6 +13,7 @@ It includes functions to load audio files, extract features, and prepare the dat
 
 import argparse
 import logging
+from pathlib import Path
 
 from lhotse.recipes.audio_mnist import prepare_audio_mnist
 from lhotse import RecordingSet, SupervisionSet, CutSet
@@ -27,7 +28,10 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-def prepare_audiomnist(data_dir, output_dir):
+def prepare_audiomnist(
+    data_dir, 
+    output_dir
+):
     """
     Prepares the AudioMNIST dataset for ASR by loading audio files and
     extracting features.
@@ -42,8 +46,8 @@ def prepare_audiomnist(data_dir, output_dir):
     # recordings.to_file(output_dir / "audio_mnist_recordings.jsonl.gz")
     # exists just load them from disk
 
-    supervision_file = output_dir / "audio_mnist_supervisions.jsonl.gz"
-    recordings_file = output_dir / "audio_mnist_recordings.jsonl.gz"
+    supervision_file = Path(output_dir / "audio_mnist_supervisions.jsonl.gz")
+    recordings_file = Path(output_dir / "audio_mnist_recordings.jsonl.gz")
 
     if recordings_file.is_file() and supervision_file.is_file():
         logger.info("Loading existing AudioMNIST dataset...")

@@ -89,12 +89,17 @@ if __name__ == "__main__":
     manifests = prepare_audiomnist(args.data_dir, args.output_dir)
 
     # Lets take this a bit further and convert it into a CutSet and then split
-    cuts = CutSet.from_manifests(
+    cut_set = CutSet.from_manifests(
         recordings=manifests["recordings"],
         supervisions=manifests["supervisions"]
     )
 
-    train_cuts, test_cuts = cuts.split(num_splits=2, proportions=[0.9, 0.1])
+    n_cuts_sample = len(cut_set)
+    first = int(n_cuts_sample * 0.8)
+    last = n_cuts_sample - first
+    train_cuts = cut_set.subset(first=first)
+    test_cuts = cut_set.subset(last=last)
+
     train_cuts.to_file(args.output_dir / "audio-mnist_cuts_train.jsonl.gz")
     test_cuts.to_file(args.output_dir / "audio-mnist_cuts_test.jsonl.gz")
 

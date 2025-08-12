@@ -73,6 +73,7 @@ def compute_fbank_audiomnist(
     prefix = "audio_mnist"
     suffix = "jsonl.gz"
     manifests = read_manifests_if_cached(
+        dataset_parts=None,
         output_dir=src_dir,
         prefix=prefix,
         suffix=suffix,

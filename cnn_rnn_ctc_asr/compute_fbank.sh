@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+./compute_fbank.py \
+  --src-dir ~/data/AudioMNIST_processed \
+  --output-dir ~/data/AudioMNIST_processed/fbank \
+  --perturb-speed true \
+  --num-jobs 15 \
+  --num-mel-bins 80
+
+echo "Fbank features computed and saved to ~/data/AudioMNIST_processed/fbank"
+

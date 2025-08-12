@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-./compute_fbank.py \
+python ./compute_fbank.py \
   --src-dir ~/data/AudioMNIST_processed \
   --output-dir ~/data/AudioMNIST_processed/fbank \
   --perturb-speed true \

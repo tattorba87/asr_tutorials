@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source ./path.sh
+
 python ./compute_fbank.py \
   --src-dir ~/data/AudioMNIST_processed \
   --output-dir ~/data/AudioMNIST_processed/fbank \

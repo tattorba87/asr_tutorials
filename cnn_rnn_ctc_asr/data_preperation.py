@@ -100,7 +100,7 @@ if __name__ == "__main__":
     train_cuts = cut_set.subset(first=first)
     test_cuts = cut_set.subset(last=last)
 
-    train_cuts.to_file(args.output_dir / "audio-mnist_cuts_train.jsonl.gz")
-    test_cuts.to_file(args.output_dir / "audio-mnist_cuts_test.jsonl.gz")
+    train_cuts.to_file(Path(args.output_dir) / "audio-mnist_cuts_train.jsonl.gz")
+    test_cuts.to_file(Path(args.output_dir) / "audio-mnist_cuts_test.jsonl.gz")
 
     logger.info("AudioMNIST dataset prepared and saved to %s", args.output_dir)

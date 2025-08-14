@@ -13,9 +13,7 @@ from typing import Optional
 
 import torch
 
-from lhotse import CutSet, Fbank, FbankConfig, LilcomChunkyWriter
-from lhotse.recipes.utils import read_manifests_if_cached
-
+from lhotse import Fbank, FbankConfig, LilcomChunkyWriter, CutSet
 from icefall.utils import get_executor, str2bool
 
 torch.set_num_threads(1)
@@ -35,6 +33,12 @@ def get_args():
         type=str,
         default="data/fbank",
         help="""Path to the output directory for the fbank features.""",
+    )
+    parser.add_argument(
+        "--partition",
+        type=str,
+        default="",
+        help="""Paritition to process""",
     )
     parser.add_argument(
         "--perturb-speed",
@@ -61,56 +65,48 @@ def get_args():
 def compute_fbank_audiomnist(
     src_dir: Path,
     output_dir: Path,
+    prefix: str = "audio-mnist",
+    partition: str = "",
     perturb_speed: Optional[bool] = True,
     num_mel_bins: int = 80,
     num_jobs: int = 15,
+    suffix: str = "jsonl.gz",
 ):
     src_dir = Path(src_dir)
     output_dir = Path(output_dir)
     num_jobs = min(num_jobs, os.cpu_count())
     num_mel_bins = int(num_mel_bins)
-
-    prefix = "audio_mnist"
-    suffix = "jsonl.gz"
-    manifests = read_manifests_if_cached(
-        dataset_parts=None,
-        output_dir=src_dir,
-        prefix=prefix,
-        suffix=suffix,
-    )
-    assert manifests is not None
     extractor = Fbank(FbankConfig(num_mel_bins=num_mel_bins))
 
     with get_executor() as ex:  # Initialize the executor only once.
-        for partition, m in manifests.items():
-            cuts_filename = f"{prefix}_cuts_{partition}.{suffix}"
-            if (output_dir / cuts_filename).is_file():
-                logging.info(f"{partition} already exists - skipping.")
-                continue
-            logging.info(f"Processing {partition}")
-            cut_set = CutSet.from_manifests(
-                recordings=m["recordings"],
-                supervisions=m["supervisions"],
-            )
+        cuts_filename = f"{prefix}_cuts_{partition}.{suffix}"
+        logging.info(f"Processing {cuts_filename}...")
+        cutset_file = src_dir / cuts_filename
 
-            if "train" in partition:
-                if perturb_speed:
-                    logging.info("Performing speed perturbation.")
-                    cut_set = (
-                        cut_set
-                        + cut_set.perturb_speed(0.9)
-                        + cut_set.perturb_speed(1.1)
-                    )
+        if cutset_file.exists():
+            cut_set = CutSet.from_jsonl(cutset_file)
+        else:
+            logging.warning(f"{cutset_file} does not exist.")
+            return
 
-            cut_set = cut_set.compute_and_store_features(
-                extractor=extractor,
-                storage_path=f"{output_dir}/{prefix}_feats_{partition}",
-                # when an executor is specified, make more partitions
-                num_jobs=num_jobs if ex is None else 80,
-                executor=ex,
-                storage_type=LilcomChunkyWriter,
-            )
-            cut_set.to_file(output_dir / cuts_filename)
+        if "train" in partition:
+            if perturb_speed:
+                logging.info("Performing speed perturbation.")
+                cut_set = (
+                    cut_set +
+                    cut_set.perturb_speed(0.9) +
+                    cut_set.perturb_speed(1.1)
+                )
+
+        cut_set = cut_set.compute_and_store_features(
+            extractor=extractor,
+            storage_path=f"{output_dir}/{prefix}_feats_{partition}",
+            # when an executor is specified, make more partitions
+            num_jobs=num_jobs if ex is None else 80,
+            executor=ex,
+            storage_type=LilcomChunkyWriter,
+        )
+        cut_set.to_file(output_dir / cuts_filename)
 
 
 if __name__ == "__main__":

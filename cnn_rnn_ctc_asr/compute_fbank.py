@@ -74,12 +74,16 @@ def compute_fbank_audiomnist(
     num_mel_bins: int = 80,
     num_jobs: int = 15,
     suffix: str = "jsonl.gz",
+    sampling_rate: int = 16000,
 ):
     src_dir = Path(src_dir)
     output_dir = Path(output_dir)
     num_jobs = min(num_jobs, os.cpu_count())
     num_mel_bins = int(num_mel_bins)
-    extractor = Fbank(FbankConfig(num_mel_bins=num_mel_bins))
+    extractor = Fbank(
+        FbankConfig(num_mel_bins=num_mel_bins),
+        sampling_rate=sampling_rate,
+    )
 
     with get_executor() as ex:  # Initialize the executor only once.
         cuts_filename = f"{prefix}_cuts_{partition}.{suffix}"
@@ -91,6 +95,17 @@ def compute_fbank_audiomnist(
         else:
             logging.warning(f"{cutset_file} does not exist.")
             return
+
+        logging.info(
+            "Ensuring that the audio is resampled to 8KHz if not already."
+        )
+        cut_set = CutSet.from_cuts(
+            (
+                cut.resample(sampling_rate)
+                if cut.sampling_rate != sampling_rate else cut
+            )
+            for cut in cut_set
+        )
 
         if "train" in partition:
             if perturb_speed:

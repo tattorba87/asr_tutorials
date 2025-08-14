@@ -120,8 +120,11 @@ if __name__ == "__main__":
     compute_fbank_audiomnist(
         src_dir=args.src_dir,
         output_dir=args.output_dir,
+        prefix="audio-mnist",
+        partition=args.partition,
         perturb_speed=args.perturb_speed,
         num_mel_bins=args.num_mel_bins,
         num_jobs=args.num_jobs,
+        suffix="jsonl.gz",
     )
     logging.info("Done computing fbank features.")

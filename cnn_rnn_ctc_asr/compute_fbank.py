@@ -19,6 +19,9 @@ from icefall.utils import get_executor, str2bool
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
 
+# Just disables the warning, doesn't take advantage of AVX/FMA to run faster
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 
 def get_args():
     parser = argparse.ArgumentParser()

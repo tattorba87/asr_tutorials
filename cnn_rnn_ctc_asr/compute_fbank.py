@@ -81,8 +81,10 @@ def compute_fbank_audiomnist(
     num_jobs = min(num_jobs, os.cpu_count())
     num_mel_bins = int(num_mel_bins)
     extractor = Fbank(
-        FbankConfig(num_mel_bins=num_mel_bins),
-        sampling_rate=sampling_rate,
+        FbankConfig(
+            num_mel_bins=num_mel_bins,
+            sampling_rate=sampling_rate,
+        ),
     )
 
     with get_executor() as ex:  # Initialize the executor only once.
@@ -144,5 +146,6 @@ if __name__ == "__main__":
         num_mel_bins=args.num_mel_bins,
         num_jobs=args.num_jobs,
         suffix="jsonl.gz",
+        sampling_rate=16000,
     )
     logging.info("Done computing fbank features.")
